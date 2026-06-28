@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CloudOpsAI — Intelligent Cloud Infrastructure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060912;
+  --bg2:#0a0f1e;
+  --surface:#0d1424;
+  --card:#111827;
+  --card2:#141e30;
+  --border:#1a2540;
+  --border2:#1e2d50;
+  --cyan:#00d4ff;
+  --cyan2:#0099cc;
+  --violet:#7c3aed;
+  --violet2:#a855f7;
+  --green:#00ff9d;
+  --amber:#f59e0b;
+  --red:#ef4444;
+  --pink:#ec4899;
+  --text:#f0f4ff;
+  --text2:#c8d5f0;
+  --muted:#4a6080;
+  --label:#7a94b8;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Space Grotesk',sans-serif;
+  --radius:12px;
+  --radius-sm:8px;
+  --glow-cyan:0 0 40px rgba(0,212,255,0.15);
+  --glow-violet:0 0 40px rgba(124,58,237,0.2);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::selection{background:rgba(0,212,255,0.2);color:var(--text)}
+
+/* ─── CANVAS BACKGROUND ─── */
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.5}
+
+/* ─── NAV ─── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 3rem;height:64px;
+  background:rgba(6,9,18,0.8);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  transition:background 0.3s;
+}
+nav.scrolled{background:rgba(6,9,18,0.95);border-bottom-color:var(--border)}
+.nav-logo{
+  font-family:var(--mono);font-size:1rem;font-weight:600;
+  color:var(--text);letter-spacing:-0.02em;
+  display:flex;align-items:center;gap:0.5rem;text-decoration:none;
+}
+.nav-logo-icon{
+  width:28px;height:28px;border-radius:6px;
+  background:linear-gradient(135deg,var(--cyan),var(--violet));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;font-weight:700;color:#fff;
+}
+.nav-logo span{color:var(--cyan)}
+.nav-center{display:flex;gap:0.25rem;list-style:none}
+.nav-center a{
+  font-size:0.82rem;color:var(--label);text-decoration:none;
+  padding:0.4rem 0.85rem;border-radius:6px;
+  transition:all 0.2s;letter-spacing:0.01em;
+}
+.nav-center a:hover{color:var(--text);background:rgba(255,255,255,0.05)}
+.nav-center a.active{color:var(--cyan);background:rgba(0,212,255,0.08)}
+.nav-right{display:flex;align-items:center;gap:0.75rem}
+.nav-btn{
+  font-family:var(--mono);font-size:0.75rem;font-weight:500;
+  padding:0.45rem 1.1rem;border-radius:6px;cursor:pointer;
+  text-decoration:none;transition:all 0.2s;
+  border:1px solid var(--border2);color:var(--label);background:transparent;
+}
+.nav-btn:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,0.05)}
+.nav-btn.primary{
+  background:linear-gradient(135deg,var(--cyan),var(--cyan2));
+  border-color:transparent;color:var(--bg);font-weight:600;
+}
+.nav-btn.primary:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,212,255,0.3)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:22px;height:2px;background:var(--label);border-radius:2px;transition:all 0.3s}
+
+/* ─── HERO ─── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;padding:8rem 2rem 5rem;overflow:hidden;
+}
+.hero-glow{
+  position:absolute;top:15%;left:50%;transform:translateX(-50%);
+  width:900px;height:500px;
+  background:radial-gradient(ellipse,rgba(0,212,255,0.07) 0%,rgba(124,58,237,0.05) 40%,transparent 70%);
+  pointer-events:none;
+}
+.hero-inner{position:relative;z-index:1;text-align:center;max-width:900px}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  font-family:var(--mono);font-size:0.72rem;
+  color:var(--cyan);letter-spacing:0.12em;text-transform:uppercase;
+  border:1px solid rgba(0,212,255,0.25);
+  background:rgba(0,212,255,0.06);
+  border-radius:99px;padding:0.35rem 1rem;
+  margin-bottom:2rem;
+  animation:fadeDown 0.5s ease both;
+}
+.hero-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:pulse 2s infinite}
+h1{
+  font-size:clamp(3rem,8vw,6.5rem);font-weight:700;
+  line-height:1;letter-spacing:-0.04em;
+  margin-bottom:1.5rem;
+  animation:fadeDown 0.6s 0.1s ease both;
+}
+.h1-line1{display:block;color:var(--text)}
+.h1-line2{
+  display:block;
+  background:linear-gradient(135deg,var(--cyan) 0%,var(--violet2) 60%,var(--pink) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{
+  font-size:1.15rem;color:var(--label);max-width:600px;
+  margin:0 auto 2.5rem;font-weight:400;line-height:1.7;
+  animation:fadeDown 0.6s 0.2s ease both;
+}
+.hero-cta{
+  display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
+  animation:fadeDown 0.6s 0.3s ease both;margin-bottom:1.5rem;
+}
+.btn{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  padding:0.85rem 2rem;font-family:var(--sans);
+  font-size:0.9rem;font-weight:600;
+  text-decoration:none;border-radius:var(--radius-sm);
+  transition:all 0.25s;cursor:pointer;border:none;
+  letter-spacing:-0.01em;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--cyan),#0099cc);
+  color:var(--bg);box-shadow:0 4px 24px rgba(0,212,255,0.25);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,212,255,0.4)}
+.btn-ghost{
+  background:rgba(255,255,255,0.04);color:var(--text2);
+  border:1px solid var(--border2);
+}
+.btn-ghost:hover{background:rgba(255,255,255,0.08);border-color:var(--border2);transform:translateY(-1px)}
+.hero-stats{
+  display:flex;justify-content:center;gap:3rem;flex-wrap:wrap;
+  animation:fadeDown 0.6s 0.4s ease both;
+  border-top:1px solid var(--border);
+  padding-top:1.5rem;margin-top:0.5rem;
+}
+.hero-stat{text-align:center}
+.hero-stat-val{
+  font-family:var(--mono);font-size:1.6rem;font-weight:600;
+  background:linear-gradient(135deg,var(--cyan),var(--violet2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-stat-label{font-size:0.78rem;color:var(--muted);letter-spacing:0.05em;margin-top:0.2rem}
+
+/* ─── DASHBOARD MOCKUP ─── */
+.mockup-wrap{
+  position:relative;z-index:1;
+  width:100%;max-width:980px;margin:4rem auto 0;
+  animation:fadeUp 0.8s 0.5s ease both;
+}
+.mockup-glow{
+  position:absolute;inset:-1px;
+  background:linear-gradient(135deg,var(--cyan),var(--violet2),var(--pink));
+  border-radius:calc(var(--radius) + 1px);
+  opacity:0.25;filter:blur(1px);
+  z-index:-1;
+}
+.mockup-chrome{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.chrome-bar{
+  display:flex;align-items:center;gap:0.6rem;
+  padding:0.85rem 1.25rem;
+  background:rgba(0,0,0,0.3);
+  border-bottom:1px solid var(--border);
+}
+.chrome-dot{width:11px;height:11px;border-radius:50%}
+.chrome-dot:nth-child(1){background:#ff5f57}
+.chrome-dot:nth-child(2){background:#febc2e}
+.chrome-dot:nth-child(3){background:#28c840}
+.chrome-url{
+  flex:1;text-align:center;
+  font-family:var(--mono);font-size:0.68rem;color:var(--muted);
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);border-radius:5px;
+  padding:0.3rem 1rem;margin:0 1rem;
+}
+.mockup-body{display:grid;grid-template-columns:210px 1fr;min-height:420px}
+
+/* sidebar */
+.mock-sidebar{
+  background:rgba(0,0,0,0.3);
+  border-right:1px solid var(--border);
+  padding:1rem 0;
+}
+.mock-sidebar-logo{
+  display:flex;align-items:center;gap:0.5rem;
+  padding:0.5rem 1.25rem 1.25rem;
+  border-bottom:1px solid var(--border);
+  margin-bottom:0.75rem;
+}
+.mock-sidebar-logo-icon{
+  width:22px;height:22px;border-radius:5px;
+  background:linear-gradient(135deg,var(--cyan),var(--violet));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.6rem;font-weight:700;color:#fff;
+}
+.mock-sidebar-logo-text{font-family:var(--mono);font-size:0.72rem;color:var(--text);font-weight:600}
+.mock-sidebar-logo-text span{color:var(--cyan)}
+.sidebar-group{margin-bottom:0.5rem}
+.sidebar-group-label{
+  font-family:var(--mono);font-size:0.56rem;
+  color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;
+  padding:0.4rem 1.25rem;
+}
+.sidebar-link{
+  display:flex;align-items:center;gap:0.55rem;
+  padding:0.45rem 1.25rem;
+  font-family:var(--mono);font-size:0.7rem;color:var(--muted);
+  cursor:default;transition:all 0.15s;position:relative;
+}
+.sidebar-link.active{
+  color:var(--cyan);background:rgba(0,212,255,0.08);
+}
+.sidebar-link.active::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:var(--cyan);border-radius:0 2px 2px 0;
+}
+.sidebar-link:not(.active):hover{color:var(--label);background:rgba(255,255,255,0.03)}
+.sidebar-link .s-icon{font-size:0.8rem;width:1rem;flex-shrink:0}
+.sidebar-badge{
+  margin-left:auto;font-size:0.58rem;
+  background:rgba(239,68,68,0.2);color:var(--red);
+  padding:1px 6px;border-radius:99px;
+}
+
+/* main panel */
+.mock-main{padding:1.5rem;display:flex;flex-direction:column;gap:1rem}
+.mock-topbar{display:flex;align-items:center;justify-content:space-between}
+.mock-title{font-size:0.82rem;font-weight:600;color:var(--text)}
+.mock-title span{color:var(--muted);font-weight:400;font-size:0.72rem;margin-left:0.5rem}
+.live-badge{
+  display:flex;align-items:center;gap:0.4rem;
+  font-family:var(--mono);font-size:0.62rem;
+  color:var(--green);background:rgba(0,255,157,0.07);
+  border:1px solid rgba(0,255,157,0.2);
+  border-radius:99px;padding:0.25rem 0.7rem;
+}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem}
+.m-card{
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:0.9rem;
+  position:relative;overflow:hidden;
+}
+.m-card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent,var(--cyan)),transparent);
+  opacity:0.6;
+}
+.m-card[data-accent="green"]{ --accent:var(--green)}
+.m-card[data-accent="amber"]{ --accent:var(--amber)}
+.m-card[data-accent="violet"]{--accent:var(--violet2)}
+.m-label{font-family:var(--mono);font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.4rem}
+.m-val{font-family:var(--mono);font-size:1.45rem;font-weight:600;line-height:1;margin-bottom:0.3rem}
+.m-val.cyan{color:var(--cyan)}
+.m-val.green{color:var(--green)}
+.m-val.amber{color:var(--amber)}
+.m-delta{font-family:var(--mono);font-size:0.6rem;color:var(--muted)}
+.m-delta.up{color:var(--red)}
+.m-delta.down{color:var(--green)}
+.charts-row{display:grid;grid-template-columns:1.4fr 1fr;gap:0.75rem}
+.chart-card{
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:0.9rem;
+}
+.chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem}
+.chart-title{font-family:var(--mono);font-size:0.6rem;color:var(--label);letter-spacing:0.06em;text-transform:uppercase}
+.chart-badge{font-family:var(--mono);font-size:0.58rem;color:var(--cyan);background:rgba(0,212,255,0.1);border-radius:4px;padding:2px 6px}
+.sparkline{display:flex;align-items:flex-end;gap:3px;height:70px}
+.bar-s{flex:1;border-radius:2px 2px 0 0;transition:opacity 0.2s}
+.bar-s:hover{opacity:1!important}
+.ai-insight-card{
+  background:linear-gradient(135deg,rgba(0,212,255,0.04),rgba(124,58,237,0.06));
+  border:1px solid rgba(0,212,255,0.15);
+  border-radius:var(--radius-sm);padding:0.9rem;
+}
+.ai-chip{
+  display:inline-flex;align-items:center;gap:0.35rem;
+  font-family:var(--mono);font-size:0.58rem;color:var(--violet2);
+  margin-bottom:0.5rem;letter-spacing:0.06em;
+}
+.ai-text{font-family:var(--mono);font-size:0.65rem;color:var(--label);line-height:1.6}
+.ai-text strong{color:var(--green)}
+.ai-text b{color:var(--cyan)}
+
+/* ─── SECTIONS ─── */
+.section{padding:7rem 2rem;position:relative;z-index:1}
+.section-alt{background:var(--bg2)}
+.container{max-width:1100px;margin:0 auto}
+.section-tag{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  font-family:var(--mono);font-size:0.68rem;color:var(--cyan);
+  letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem;
+}
+.section-tag::before{content:'//';color:var(--muted)}
+h2{
+  font-size:clamp(2rem,4.5vw,3.2rem);font-weight:700;
+  line-height:1.1;letter-spacing:-0.03em;margin-bottom:1rem;
+}
+h2 em{font-style:normal;background:linear-gradient(135deg,var(--cyan),var(--violet2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section-lead{font-size:1.05rem;color:var(--label);max-width:520px;line-height:1.75;margin-bottom:3.5rem}
+
+/* ─── FEATURES GRID ─── */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+.feature-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:2rem;
+  position:relative;overflow:hidden;
+  transition:transform 0.3s,border-color 0.3s;
+  cursor:default;
+}
+.feature-card::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--f-color,var(--cyan)),transparent);
+  opacity:0;transition:opacity 0.3s;
+}
+.feature-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,0.1)}
+.feature-card:hover::before{opacity:1}
+.feature-card[data-color="violet"]{--f-color:var(--violet2)}
+.feature-card[data-color="green"]{--f-color:var(--green)}
+.feature-card[data-color="pink"]{--f-color:var(--pink)}
+.feature-card[data-color="amber"]{--f-color:var(--amber)}
+.feature-icon-wrap{
+  width:48px;height:48px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;margin-bottom:1.25rem;
+  background:var(--f-bg,rgba(0,212,255,0.1));
+}
+.feature-card[data-color="violet"] .feature-icon-wrap{background:rgba(124,58,237,0.12)}
+.feature-card[data-color="green"]  .feature-icon-wrap{background:rgba(0,255,157,0.1)}
+.feature-card[data-color="pink"]   .feature-icon-wrap{background:rgba(236,72,153,0.1)}
+.feature-card[data-color="amber"]  .feature-icon-wrap{background:rgba(245,158,11,0.1)}
+.feature-title{font-size:1rem;font-weight:600;margin-bottom:0.6rem;letter-spacing:-0.01em}
+.feature-desc{font-size:0.875rem;color:var(--label);line-height:1.7}
+
+/* ─── LIVE METRICS DEMO ─── */
+.demo-section{background:var(--bg)}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start}
+.demo-left h3{font-size:1.5rem;font-weight:600;margin-bottom:0.75rem;letter-spacing:-0.02em}
+.demo-left p{font-size:0.9rem;color:var(--label);line-height:1.75;margin-bottom:1.5rem}
+.demo-controls{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:2rem}
+.demo-tab{
+  font-family:var(--mono);font-size:0.72rem;
+  padding:0.4rem 0.9rem;border-radius:6px;
+  border:1px solid var(--border2);color:var(--muted);
+  background:transparent;cursor:pointer;transition:all 0.2s;
+}
+.demo-tab:hover{color:var(--text);border-color:var(--border2)}
+.demo-tab.active{color:var(--cyan);border-color:var(--cyan);background:rgba(0,212,255,0.08)}
+.live-chart-area{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.5rem;
+}
+.live-chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.live-chart-title{font-family:var(--mono);font-size:0.72rem;color:var(--label);text-transform:uppercase;letter-spacing:0.08em}
+.live-chart-val{font-family:var(--mono);font-size:1.6rem;font-weight:600;color:var(--cyan)}
+.live-chart-val span{font-size:0.75rem;color:var(--muted);margin-left:0.3rem}
+#live-canvas{width:100%;height:120px;display:block}
+.chart-x-labels{display:flex;justify-content:space-between;margin-top:0.5rem}
+.chart-x-labels span{font-family:var(--mono);font-size:0.58rem;color:var(--muted)}
+
+/* ─── AI CHAT DEMO ─── */
+.ai-chat-panel{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  display:flex;flex-direction:column;height:380px;
+}
+.ai-chat-header{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:1rem 1.25rem;
+  background:rgba(124,58,237,0.06);
+  border-bottom:1px solid var(--border);
+}
+.ai-chat-avatar{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--violet),var(--violet2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.85rem;
+}
+.ai-chat-info .name{font-size:0.85rem;font-weight:600;color:var(--text)}
+.ai-chat-info .status{font-family:var(--mono);font-size:0.62rem;color:var(--green)}
+.ai-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.75rem}
+.ai-messages::-webkit-scrollbar{width:3px}
+.ai-messages::-webkit-scrollbar-thumb{background:var(--border)}
+.msg{max-width:85%;font-size:0.82rem;line-height:1.6;padding:0.65rem 0.9rem;border-radius:10px}
+.msg.ai{
+  background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);
+  color:var(--text2);align-self:flex-start;border-radius:4px 10px 10px 10px;
+}
+.msg.user{
+  background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.15);
+  color:var(--text2);align-self:flex-end;border-radius:10px 4px 10px 10px;
+}
+.msg.typing{color:var(--muted);font-style:italic}
+.ai-input-area{
+  display:flex;gap:0.5rem;padding:0.75rem;
+  border-top:1px solid var(--border);
+}
+#ai-input{
+  flex:1;background:rgba(255,255,255,0.04);
+  border:1px solid var(--border2);border-radius:8px;
+  color:var(--text);font-family:var(--sans);font-size:0.82rem;
+  padding:0.55rem 0.85rem;outline:none;
+  transition:border-color 0.2s;
+}
+#ai-input:focus{border-color:rgba(124,58,237,0.4)}
+#ai-input::placeholder{color:var(--muted)}
+#ai-send{
+  background:linear-gradient(135deg,var(--violet),var(--violet2));
+  border:none;border-radius:8px;color:#fff;
+  padding:0.55rem 1rem;cursor:pointer;font-size:0.85rem;
+  transition:opacity 0.2s;
+}
+#ai-send:hover{opacity:0.85}
+.ai-suggestions{
+  display:flex;gap:0.4rem;padding:0 0.75rem 0.75rem;flex-wrap:wrap;
+}
+.ai-sug{
+  font-family:var(--mono);font-size:0.62rem;color:var(--muted);
+  border:1px solid var(--border);border-radius:5px;padding:0.2rem 0.6rem;
+  cursor:pointer;transition:all 0.2s;background:transparent;
+}
+.ai-sug:hover{color:var(--violet2);border-color:rgba(124,58,237,0.4)}
+
+/* ─── ALERTS DASHBOARD ─── */
+.alerts-section{}
+.alerts-filter{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.filter-btn{
+  font-family:var(--mono);font-size:0.7rem;
+  padding:0.35rem 0.85rem;border-radius:6px;
+  border:1px solid var(--border2);color:var(--muted);
+  background:transparent;cursor:pointer;transition:all 0.2s;
+}
+.filter-btn.active{color:var(--text);border-color:var(--border2);background:rgba(255,255,255,0.06)}
+.filter-btn[data-filter="critical"].active{color:var(--red);border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.06)}
+.filter-btn[data-filter="warning"].active{color:var(--amber);border-color:rgba(245,158,11,0.4);background:rgba(245,158,11,0.06)}
+.filter-btn[data-filter="info"].active{color:var(--cyan);border-color:rgba(0,212,255,0.3);background:rgba(0,212,255,0.05)}
+.alerts-list{display:flex;flex-direction:column;gap:0.75rem}
+.alert-card{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:1.1rem 1.25rem;border-radius:var(--radius-sm);
+  border:1px solid transparent;
+  transition:all 0.3s;cursor:default;
+}
+.alert-card[data-sev="critical"]{background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.2)}
+.alert-card[data-sev="warning"]{background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2)}
+.alert-card[data-sev="info"]{background:rgba(0,212,255,0.03);border-color:rgba(0,212,255,0.15)}
+.alert-card[data-sev="ai"]{background:rgba(124,58,237,0.05);border-color:rgba(124,58,237,0.2)}
+.alert-card:hover{transform:translateX(4px)}
+.alert-card.hidden{display:none}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:0.45rem}
+.alert-card[data-sev="critical"] .alert-dot{background:var(--red);box-shadow:0 0 8px var(--red)}
+.alert-card[data-sev="warning"]  .alert-dot{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.alert-card[data-sev="info"]     .alert-dot{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.alert-card[data-sev="ai"]       .alert-dot{background:var(--violet2);box-shadow:0 0 8px var(--violet2)}
+.alert-body{flex:1}
+.alert-sev{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.25rem}
+.alert-card[data-sev="critical"] .alert-sev{color:var(--red)}
+.alert-card[data-sev="warning"]  .alert-sev{color:var(--amber)}
+.alert-card[data-sev="info"]     .alert-sev{color:var(--cyan)}
+.alert-card[data-sev="ai"]       .alert-sev{color:var(--violet2)}
+.alert-msg{font-size:0.875rem;color:var(--text2);line-height:1.55}
+.alert-meta{font-family:var(--mono);font-size:0.62rem;color:var(--muted);margin-top:0.3rem}
+.alert-time{font-family:var(--mono);font-size:0.65rem;color:var(--muted);white-space:nowrap;padding-top:0.3rem}
+
+/* ─── TECH STACK ─── */
+.stack-section{background:var(--bg2)}
+.stack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.stack-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.5rem 1.25rem;
+  text-align:center;transition:all 0.3s;
+}
+.stack-card:hover{border-color:var(--border2);transform:translateY(-3px);background:var(--card2)}
+.stack-emoji{font-size:2rem;margin-bottom:0.75rem}
+.stack-name{font-weight:600;font-size:0.95rem;margin-bottom:0.25rem}
+.stack-role{font-family:var(--mono);font-size:0.65rem;color:var(--muted)}
+.stack-tag{
+  display:inline-block;margin-top:0.75rem;
+  font-family:var(--mono);font-size:0.6rem;
+  padding:0.2rem 0.55rem;border-radius:4px;
+}
+.stack-tag.backend{background:rgba(0,212,255,0.08);color:var(--cyan);border:1px solid rgba(0,212,255,0.2)}
+.stack-tag.frontend{background:rgba(245,158,11,0.08);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
+.stack-tag.ai{background:rgba(124,58,237,0.1);color:var(--violet2);border:1px solid rgba(124,58,237,0.25)}
+.stack-tag.data{background:rgba(0,255,157,0.06);color:var(--green);border:1px solid rgba(0,255,157,0.2)}
+
+/* ─── ARCHITECTURE ─── */
+.arch-section{}
+.arch-flow{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+}
+.arch-col{border-right:1px solid var(--border);padding:1.75rem 1.5rem}
+.arch-col:last-child{border-right:none}
+.arch-col-title{
+  font-family:var(--mono);font-size:0.65rem;
+  color:var(--cyan);letter-spacing:0.1em;text-transform:uppercase;
+  margin-bottom:1.25rem;padding-bottom:0.75rem;
+  border-bottom:1px solid var(--border);
+}
+.arch-item{
+  display:flex;align-items:center;gap:0.65rem;
+  padding:0.65rem 0.75rem;border-radius:6px;
+  margin-bottom:0.5rem;border:1px solid var(--border);
+  background:var(--bg);transition:border-color 0.2s;
+}
+.arch-item:hover{border-color:var(--border2)}
+.arch-item.hl{border-color:rgba(0,212,255,0.3);background:rgba(0,212,255,0.04)}
+.arch-item.hl .arch-item-name{color:var(--cyan)}
+.arch-item.hl-v{border-color:rgba(124,58,237,0.3);background:rgba(124,58,237,0.05)}
+.arch-item.hl-v .arch-item-name{color:var(--violet2)}
+.arch-item-icon{font-size:0.9rem;width:1.1rem;flex-shrink:0}
+.arch-item-name{font-size:0.78rem;font-weight:500}
+.arch-item-sub{font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-top:0.1rem}
+
+/* ─── PROJECT DETAILS ─── */
+.about-section{}
+.about-grid{display:grid;grid-template-columns:1fr 360px;gap:4rem;align-items:start}
+.about-body p{font-size:0.95rem;color:var(--label);line-height:1.8;margin-bottom:1.25rem}
+.tag-cloud{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:1.5rem}
+.tag{
+  font-family:var(--mono);font-size:0.65rem;
+  padding:0.25rem 0.6rem;border-radius:5px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border2);color:var(--label);
+  transition:all 0.2s;cursor:default;
+}
+.tag:hover{color:var(--cyan);border-color:rgba(0,212,255,0.3);background:rgba(0,212,255,0.05)}
+.info-panel{display:flex;flex-direction:column;gap:1.25rem}
+.info-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+}
+.info-card-header{
+  padding:0.85rem 1.25rem;
+  background:rgba(255,255,255,0.02);
+  border-bottom:1px solid var(--border);
+  font-family:var(--mono);font-size:0.65rem;color:var(--muted);
+  letter-spacing:0.1em;text-transform:uppercase;
+}
+.info-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0.7rem 1.25rem;border-bottom:1px solid var(--border);
+  font-size:0.83rem;
+}
+.info-row:last-child{border-bottom:none}
+.info-key{color:var(--muted)}
+.info-val{font-family:var(--mono);font-size:0.75rem;color:var(--cyan)}
+
+/* ─── FOOTER ─── */
+footer{
+  background:var(--bg);
+  border-top:1px solid var(--border);
+  padding:3rem 2rem;
+}
+.footer-inner{
+  max-width:1100px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:1.5rem;
+}
+.footer-brand .logo{
+  font-family:var(--mono);font-size:1rem;font-weight:600;
+  color:var(--text);margin-bottom:0.35rem;
+}
+.footer-brand .logo span{color:var(--cyan)}
+.footer-brand p{font-size:0.78rem;color:var(--muted)}
+.footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}
+.footer-links a{font-size:0.82rem;color:var(--muted);text-decoration:none;transition:color 0.2s}
+.footer-links a:hover{color:var(--cyan)}
+.footer-copy{font-family:var(--mono);font-size:0.65rem;color:var(--muted)}
+
+/* ─── SCROLL PROGRESS ─── */
+#progress-bar{
+  position:fixed;top:64px;left:0;height:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--violet2));
+  z-index:201;width:0%;transition:width 0.1s;
+}
+
+/* ─── TOAST ─── */
+#toast{
+  position:fixed;bottom:2rem;right:2rem;z-index:300;
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);padding:0.85rem 1.25rem;
+  font-size:0.85rem;color:var(--text);
+  transform:translateX(120%);transition:transform 0.35s ease;
+  display:flex;align-items:center;gap:0.6rem;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  max-width:300px;
+}
+#toast.show{transform:translateX(0)}
+#toast .toast-icon{font-size:1rem}
+
+/* ─── BACK TO TOP ─── */
+#back-top{
+  position:fixed;bottom:2rem;left:2rem;z-index:300;
+  width:40px;height:40px;border-radius:10px;
+  background:var(--card);border:1px solid var(--border2);
+  color:var(--label);font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s;opacity:0;pointer-events:none;
+}
+#back-top.visible{opacity:1;pointer-events:auto}
+#back-top:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-2px)}
+
+/* ─── REVEAL ─── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
+
+/* ─── MOBILE NAV ─── */
+.mobile-menu{
+  display:none;position:fixed;top:64px;left:0;right:0;z-index:199;
+  background:rgba(6,9,18,0.98);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:1rem;flex-direction:column;gap:0.25rem;
+}
+.mobile-menu.open{display:flex}
+.mobile-menu a{
+  font-size:0.9rem;color:var(--label);text-decoration:none;
+  padding:0.65rem 0.75rem;border-radius:6px;transition:all 0.2s;
+}
+.mobile-menu a:hover{color:var(--text);background:rgba(255,255,255,0.04)}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  nav{padding:0 1.25rem}
+  .nav-center{display:none}
+  .hamburger{display:flex}
+  .features-grid{grid-template-columns:1fr 1fr}
+  .stack-grid{grid-template-columns:repeat(2,1fr)}
+  .arch-flow{grid-template-columns:1fr}
+  .arch-col{border-right:none;border-bottom:1px solid var(--border)}
+  .arch-col:last-child{border-bottom:none}
+  .demo-grid{grid-template-columns:1fr}
+  .about-grid{grid-template-columns:1fr}
+  .mockup-body{grid-template-columns:1fr}
+  .mock-sidebar{display:none}
+  .metrics-row{grid-template-columns:repeat(2,1fr)}
+  .charts-row{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .features-grid{grid-template-columns:1fr}
+  .stack-grid{grid-template-columns:1fr 1fr}
+  h2{font-size:1.9rem}
+  .footer-inner{flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div id="progress-bar"></div>
+<div id="toast"><span class="toast-icon">✓</span><span id="toast-msg">Copied!</span></div>
+<button id="back-top" aria-label="Back to top">↑</button>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#home" class="nav-logo">
+    <div class="nav-logo-icon">C</div>
+    Cloud<span>Ops</span>AI
+  </a>
+  <ul class="nav-center">
+    <li><a href="#features" class="nav-link">Features</a></li>
+    <li><a href="#demo" class="nav-link">Live Demo</a></li>
+    <li><a href="#alerts" class="nav-link">Alerts</a></li>
+    <li><a href="#stack" class="nav-link">Stack</a></li>
+    <li><a href="#architecture" class="nav-link">Architecture</a></li>
+    <li><a href="#about" class="nav-link">About</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+    <a href="#about" class="nav-btn primary">View Project</a>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#features">Features</a>
+  <a href="#demo">Live Demo</a>
+  <a href="#alerts">Alerts</a>
+  <a href="#stack">Stack</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#about">About</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-dot"></div>
+      AI-Powered Cloud Infrastructure Platform
+    </div>
+    <h1>
+      <span class="h1-line1">Intelligent</span>
+      <span class="h1-line2">CloudOps</span>
+    </h1>
+    <p class="hero-sub">Monitor, manage, and optimize your entire cloud infrastructure from a single AI-driven dashboard — powered by Llama 3.2 running locally via Ollama.</p>
+    <div class="hero-cta">
+      <a href="#demo" class="btn btn-primary">Explore Live Demo →</a>
+      <a href="#features" class="btn btn-ghost">See Features</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-val" data-count="99.9">0</div>
+        <div class="hero-stat-label">% Uptime SLA</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" data-count="24">0</div>
+        <div class="hero-stat-label">Instances Monitored</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" data-count="3">0</div>
+        <div class="hero-stat-label">Alert Severity Tiers</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" data-count="34">0</div>
+        <div class="hero-stat-label">$/day AI Savings Found</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Mockup -->
+  <div class="mockup-wrap">
+    <div class="mockup-glow"></div>
+    <div class="mockup-chrome">
+      <div class="chrome-bar">
+        <div class="chrome-dot"></div>
+        <div class="chrome-dot"></div>
+        <div class="chrome-dot"></div>
+        <div class="chrome-url">cloudopsai.local/dashboard</div>
+      </div>
+      <div class="mockup-body">
+        <div class="mock-sidebar">
+          <div class="mock-sidebar-logo">
+            <div class="mock-sidebar-logo-icon">C</div>
+            <div class="mock-sidebar-logo-text">Cloud<span>Ops</span>AI</div>
+          </div>
+          <div class="sidebar-group">
+            <div class="sidebar-group-label">Overview</div>
+            <div class="sidebar-link active"><span class="s-icon">⬡</span>Dashboard</div>
+            <div class="sidebar-link"><span class="s-icon">☁</span>Instances</div>
+            <div class="sidebar-link"><span class="s-icon">📊</span>Analytics</div>
+          </div>
+          <div class="sidebar-group">
+            <div class="sidebar-group-label">AI Assist</div>
+            <div class="sidebar-link"><span class="s-icon">✦</span>Insights</div>
+            <div class="sidebar-link"><span class="s-icon">⚡</span>Optimizer</div>
+          </div>
+          <div class="sidebar-group">
+            <div class="sidebar-group-label">System</div>
+            <div class="sidebar-link"><span class="s-icon">🔔</span>Alerts<span class="sidebar-badge">3</span></div>
+            <div class="sidebar-link"><span class="s-icon">⚙</span>Settings</div>
+          </div>
+        </div>
+        <div class="mock-main">
+          <div class="mock-topbar">
+            <div class="mock-title">Infrastructure Overview <span>/ Production</span></div>
+            <div class="live-badge"><div class="live-dot"></div>Live</div>
+          </div>
+          <div class="metrics-row">
+            <div class="m-card" data-accent="amber">
+              <div class="m-label">CPU Usage</div>
+              <div class="m-val amber">67%</div>
+              <div class="m-delta up">↑ 12% from avg</div>
+            </div>
+            <div class="m-card" data-accent="green">
+              <div class="m-label">Instances</div>
+              <div class="m-val green">24</div>
+              <div class="m-delta">22 running · 2 idle</div>
+            </div>
+            <div class="m-card">
+              <div class="m-label">Uptime</div>
+              <div class="m-val cyan">99.9%</div>
+              <div class="m-delta down">↓ stable</div>
+            </div>
+            <div class="m-card" data-accent="violet">
+              <div class="m-label">Est. Cost</div>
+              <div class="m-val" style="color:var(--violet2)">$842</div>
+              <div class="m-delta">this month</div>
+            </div>
+          </div>
+          <div class="charts-row">
+            <div class="chart-card">
+              <div class="chart-head">
+                <div class="chart-title">Network Throughput</div>
+                <div class="chart-badge">MB/s</div>
+              </div>
+              <div class="sparkline" id="mock-sparkline"></div>
+            </div>
+            <div class="ai-insight-card">
+              <div class="ai-chip">✦ Llama 3.2 · Insight</div>
+              <div class="ai-text"><strong>Optimization found:</strong> us-east-1 CPU elevated 2h. Auto-scaling +2 nodes recommended. Terminate idle <b>ap-south-1</b> nodes → save <strong>$34/day</strong>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section section-alt" id="features">
+  <div class="container">
+    <div class="section-tag">capabilities</div>
+    <h2>Everything your team needs,<br><em>in one dashboard</em></h2>
+    <p class="section-lead">From real-time monitoring to AI-generated optimization — built for engineering teams who need clarity at scale.</p>
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon-wrap">📡</div>
+        <div class="feature-title">Real-Time Monitoring</div>
+        <p class="feature-desc">Live dashboards track CPU, memory, network, and disk across all instances with sub-second polling updates and instant visibility.</p>
+      </div>
+      <div class="feature-card" data-color="violet">
+        <div class="feature-icon-wrap">✦</div>
+        <div class="feature-title">AI-Driven Insights</div>
+        <p class="feature-desc">Ollama runs Llama 3.2 locally — no data leaves your environment. Get conversational infrastructure support and proactive recommendations.</p>
+      </div>
+      <div class="feature-card" data-color="green">
+        <div class="feature-icon-wrap">🔔</div>
+        <div class="feature-title">Automated Alerting</div>
+        <p class="feature-desc">Configurable thresholds trigger visual alerts across critical, warning, and info tiers — each enriched with AI-generated root-cause summaries.</p>
+      </div>
+      <div class="feature-card" data-color="amber">
+        <div class="feature-icon-wrap">📊</div>
+        <div class="feature-title">Analytics Engine</div>
+        <p class="feature-desc">Scikit-learn models detect usage anomalies and forecast resource trends before they become production incidents.</p>
+      </div>
+      <div class="feature-card" data-color="pink">
+        <div class="feature-icon-wrap">💰</div>
+        <div class="feature-title">Cost Optimization</div>
+        <p class="feature-desc">Identifies idle and over-provisioned resources. The AI recommends right-sizing and scheduling to cut cloud spend automatically.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap">🗄️</div>
+        <div class="feature-title">Persistent Storage</div>
+        <p class="feature-desc">SQLite for rapid local development, PostgreSQL for production scale. All metrics, alerts, and recommendations stored and queryable over time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section class="section demo-section" id="demo">
+  <div class="container">
+    <div class="section-tag">interactive</div>
+    <h2>Try it <em>live</em></h2>
+    <div class="demo-grid">
+      <div class="demo-left">
+        <h3>Live Metrics Simulation</h3>
+        <p>Watch real-time infrastructure data stream in. Switch between metric types to explore how the dashboard responds to different workload patterns.</p>
+        <div class="demo-controls">
+          <button class="demo-tab active" data-metric="cpu">CPU Usage</button>
+          <button class="demo-tab" data-metric="memory">Memory</button>
+          <button class="demo-tab" data-metric="network">Network</button>
+          <button class="demo-tab" data-metric="cost">Cost/hr</button>
+        </div>
+        <div class="live-chart-area">
+          <div class="live-chart-header">
+            <div class="live-chart-title" id="live-label">CPU Usage %</div>
+            <div class="live-chart-val"><span id="live-current">--</span><span>%</span></div>
+          </div>
+          <canvas id="live-canvas"></canvas>
+          <div class="chart-x-labels">
+            <span>-60s</span><span>-45s</span><span>-30s</span><span>-15s</span><span>now</span>
+          </div>
+        </div>
+      </div>
+      <div class="demo-right">
+        <h3 style="font-size:1.5rem;font-weight:600;margin-bottom:0.75rem;letter-spacing:-0.02em">AI Ops Assistant</h3>
+        <p style="font-size:0.9rem;color:var(--label);line-height:1.75;margin-bottom:1rem">Chat with the simulated Llama 3.2 assistant. Ask about your infrastructure, request optimizations, or diagnose alerts.</p>
+        <div class="ai-chat-panel">
+          <div class="ai-chat-header">
+            <div class="ai-chat-avatar">✦</div>
+            <div class="ai-chat-info">
+              <div class="name">CloudOpsAI Assistant</div>
+              <div class="status">● Llama 3.2 · Online</div>
+            </div>
+          </div>
+          <div class="ai-messages" id="chat-messages">
+            <div class="msg ai">Hello! I'm your AI infrastructure assistant. I can analyze your cloud resources, identify cost savings, and diagnose performance issues. What would you like to explore?</div>
+          </div>
+          <div class="ai-suggestions">
+            <button class="ai-sug" data-q="What's causing the CPU spike?">CPU spike?</button>
+            <button class="ai-sug" data-q="How can I reduce costs?">Reduce costs</button>
+            <button class="ai-sug" data-q="Show me anomalies">Anomalies</button>
+            <button class="ai-sug" data-q="Optimize my infrastructure">Optimize</button>
+          </div>
+          <div class="ai-input-area">
+            <input id="ai-input" placeholder="Ask about your infrastructure…" type="text"/>
+            <button id="ai-send">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ALERTS -->
+<section class="section section-alt alerts-section" id="alerts">
+  <div class="container">
+    <div class="section-tag">monitoring</div>
+    <h2>Automated <em>alert</em> visualization</h2>
+    <p class="section-lead">Three severity tiers, AI-enriched context, and real-time filtering — so on-call teams focus on what matters.</p>
+    <div class="alerts-filter reveal">
+      <button class="filter-btn active" data-filter="all">All Alerts</button>
+      <button class="filter-btn" data-filter="critical">Critical</button>
+      <button class="filter-btn" data-filter="warning">Warning</button>
+      <button class="filter-btn" data-filter="info">Info</button>
+      <button class="filter-btn" data-filter="ai">AI Insight</button>
+    </div>
+    <div class="alerts-list reveal reveal-delay-1" id="alerts-list">
+      <div class="alert-card" data-sev="critical">
+        <div class="alert-dot"></div>
+        <div class="alert-body">
+          <div class="alert-sev">Critical</div>
+          <div class="alert-msg">us-east-1 · CPU exceeded 95% for 8 consecutive minutes. Auto-scaling triggered. Check load balancer distribution immediately.</div>
+          <div class="alert-meta">Instance: i-0a1b2c3d · Region: us-east-1 · Threshold: 90%</div>
+        </div>
+        <div class="alert-time">2m ago</div>
+      </div>
+      <div class="alert-card" data-sev="warning">
+        <div class="alert-dot"></div>
+        <div class="alert-body">
+          <div class="alert-sev">Warning</div>
+          <div class="alert-msg">ap-south-1 · Memory utilization at 81%. Approaching threshold. Consider migrating workloads or expanding instance tier.</div>
+          <div class="alert-meta">Instance: i-9z8y7x6w · Region: ap-south-1 · Threshold: 80%</div>
+        </div>
+        <div class="alert-time">18m ago</div>
+      </div>
+      <div class="alert-card" data-sev="info">
+        <div class="alert-dot"></div>
+        <div class="alert-body">
+          <div class="alert-sev">Info</div>
+          <div class="alert-msg">eu-west-2 · Scheduled maintenance window starting in 4 hours. 3 instances will be temporarily unavailable. Failover routes are active.</div>
+          <div class="alert-meta">Maintenance ID: MW-2024-0891 · Duration: 45min</div>
+        </div>
+        <div class="alert-time">32m ago</div>
+      </div>
+      <div class="alert-card" data-sev="ai">
+        <div class="alert-dot"></div>
+        <div class="alert-body">
+          <div class="alert-sev">AI Insight · Llama 3.2</div>
+          <div class="alert-msg">Recurring CPU spike detected daily at 14:00–16:00 UTC for the past 7 days. Recommend pre-scaling 30 minutes before this window to reduce p99 latency by an estimated 40%.</div>
+          <div class="alert-meta">Confidence: 94% · Pattern: 7-day recurring · Action: Pre-scale +2 nodes</div>
+        </div>
+        <div class="alert-time">1h ago</div>
+      </div>
+      <div class="alert-card" data-sev="warning">
+        <div class="alert-dot"></div>
+        <div class="alert-body">
+          <div class="alert-sev">Warning</div>
+          <div class="alert-msg">us-west-2 · Disk I/O latency averaging 180ms over the past hour. SSD degradation possible. Schedule disk health check.</div>
+          <div class="alert-meta">Instance: i-4e5f6g7h · Disk: /dev/nvme0n1 · Avg I/O: 180ms</div>
+        </div>
+        <div class="alert-time">2h ago</div>
+      </div>
+      <div class="alert-card" data-sev="ai">
+        <div class="alert-dot"></div>
+        <div class="alert-body">
+          <div class="alert-sev">AI Insight · Llama 3.2</div>
+          <div class="alert-msg">2 idle instances in ap-south-1 have been running with &lt;5% CPU for 72 hours. Terminating them would save approximately $34/day with no performance impact.</div>
+          <div class="alert-meta">Potential savings: $34/day · Risk level: Low · Action: Terminate or downsize</div>
+        </div>
+        <div class="alert-time">3h ago</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section class="section stack-section" id="stack">
+  <div class="container">
+    <div class="section-tag">tech stack</div>
+    <h2>Built on a <em>modern</em><br>Python-first foundation</h2>
+    <p class="section-lead">Each technology chosen for a specific reason — not defaults, but deliberate picks for reliability and AI integration.</p>
+    <div class="stack-grid reveal">
+      <div class="stack-card">
+        <div class="stack-emoji">🐍</div>
+        <div class="stack-name">Python</div>
+        <div class="stack-role">Core language & scripting</div>
+        <span class="stack-tag backend">Backend</span>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">🌐</div>
+        <div class="stack-name">Flask</div>
+        <div class="stack-role">Web framework & REST API</div>
+        <span class="stack-tag backend">Backend</span>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">🎨</div>
+        <div class="stack-name">HTML / CSS</div>
+        <div class="stack-role">Responsive UI layer</div>
+        <span class="stack-tag frontend">Frontend</span>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">⚡</div>
+        <div class="stack-name">JavaScript</div>
+        <div class="stack-role">Dynamic charts & live updates</div>
+        <span class="stack-tag frontend">Frontend</span>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">✦</div>
+        <div class="stack-name">Ollama · Llama 3.2</div>
+        <div class="stack-role">Local LLM inference</div>
+        <span class="stack-tag ai">AI Layer</span>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">📈</div>
+        <div class="stack-name">Scikit-learn</div>
+        <div class="stack-role">Anomaly detection & ML</div>
+        <span class="stack-tag ai">AI Layer</span>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">🗄️</div>
+        <div class="stack-name">SQLite</div>
+        <div class="stack-role">Dev & local persistence</div>
+        <span class="stack-tag data">Database</span>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">🐘</div>
+        <div class="stack-name">PostgreSQL</div>
+        <div class="stack-role">Production database</div>
+        <span class="stack-tag data">Database</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section" id="architecture">
+  <div class="container">
+    <div class="section-tag">system design</div>
+    <h2>Clean three-layer<br><em>architecture</em></h2>
+    <p class="section-lead">A clear separation between presentation, API logic, and the AI+data layer keeps the system maintainable and testable.</p>
+    <div class="arch-flow reveal">
+      <div class="arch-col">
+        <div class="arch-col-title">Frontend Layer</div>
+        <div class="arch-item hl"><span class="arch-item-icon">⬡</span><div><div class="arch-item-name">Dashboard UI</div><div class="arch-item-sub">HTML/CSS/JS</div></div></div>
+        <div class="arch-item"><span class="arch-item-icon">📊</span><div><div class="arch-item-name">Chart Widgets</div><div class="arch-item-sub">Real-time visualization</div></div></div>
+        <div class="arch-item"><span class="arch-item-icon">🔔</span><div><div class="arch-item-name">Alert Panel</div><div class="arch-item-sub">Severity-based display</div></div></div>
+        <div class="arch-item"><span class="arch-item-icon">💬</span><div><div class="arch-item-name">AI Chat Widget</div><div class="arch-item-sub">Ops assistant interface</div></div></div>
+      </div>
+      <div class="arch-col">
+        <div class="arch-col-title">Flask API Layer</div>
+        <div class="arch-item hl"><span class="arch-item-icon">🌐</span><div><div class="arch-item-name">Flask App</div><div class="arch-item-sub">Routing & business logic</div></div></div>
+        <div class="arch-item"><span class="arch-item-icon">📡</span><div><div class="arch-item-name">Metrics Collector</div><div class="arch-item-sub">Polling & aggregation</div></div></div>
+        <div class="arch-item"><span class="arch-item-icon">✦</span><div><div class="arch-item-name">Ollama Client</div><div class="arch-item-sub">LLM inference bridge</div></div></div>
+        <div class="arch-item"><span class="arch-item-icon">⚡</span><div><div class="arch-item-name">Alert Engine</div><div class="arch-item-sub">Threshold management</div></div></div>
+      </div>
+      <div class="arch-col">
+        <div class="arch-col-title">AI & Data Layer</div>
+        <div class="arch-item hl-v"><span class="arch-item-icon">✦</span><div><div class="arch-item-name">Llama 3.2</div><div class="arch-item-sub">Local AI via Ollama</div></div></div>
+        <div class="arch-item hl-v"><span class="arch-item-icon">📈</span><div><div class="arch-item-name">Scikit-learn</div><div class="arch-item-sub">Anomaly detection</div></div></div>
+        <div class="arch-item"><span class="arch-item-icon">🗄️</span><div><div class="arch-item-name">SQLite / PostgreSQL</div><div class="arch-item-sub">Metric history</div></div></div>
+        <div class="arch-item"><span class="arch-item-icon">📦</span><div><div class="arch-item-name">Model Store</div><div class="arch-item-sub">Trained ML artifacts</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section section-alt about-section" id="about">
+  <div class="container">
+    <div class="section-tag">project</div>
+    <h2>About <em>CloudOpsAI</em></h2>
+    <div class="about-grid reveal">
+      <div class="about-body">
+        <p>CloudOpsAI is a full-stack AI-powered web platform that gives engineering teams a single pane of glass for cloud infrastructure management. Built with Python and Flask, the platform integrates a responsive frontend with real-time data visualization and intelligent automation.</p>
+        <p>The core differentiator is the Ollama integration — running Llama 3.2 locally so no infrastructure data leaves your environment. The model provides conversational ops support, anomaly explanations, and proactive cost optimization recommendations directly inside the dashboard.</p>
+        <p>Scikit-learn powers the anomaly detection pipeline, flagging unusual resource consumption before it becomes an incident. Alerts are automatically enriched with AI-generated context, drastically reducing mean time to resolution for on-call engineers.</p>
+        <div class="tag-cloud">
+          <span class="tag">Python</span><span class="tag">Flask</span><span class="tag">Ollama</span>
+          <span class="tag">Llama 3.2</span><span class="tag">Scikit-learn</span><span class="tag">SQLite</span>
+          <span class="tag">PostgreSQL</span><span class="tag">REST API</span><span class="tag">Anomaly Detection</span>
+          <span class="tag">Cloud Monitoring</span><span class="tag">MLOps</span><span class="tag">AI Infrastructure</span>
+        </div>
+      </div>
+      <div class="info-panel">
+        <div class="info-card">
+          <div class="info-card-header">Project Details</div>
+          <div class="info-row"><span class="info-key">Type</span><span class="info-val">Web Platform</span></div>
+          <div class="info-row"><span class="info-key">Role</span><span class="info-val">Full-Stack Dev</span></div>
+          <div class="info-row"><span class="info-key">Backend</span><span class="info-val">Python · Flask</span></div>
+          <div class="info-row"><span class="info-key">Frontend</span><span class="info-val">HTML · CSS · JS</span></div>
+          <div class="info-row"><span class="info-key">AI Model</span><span class="info-val">Llama 3.2</span></div>
+          <div class="info-row"><span class="info-key">Inference</span><span class="info-val">Ollama (local)</span></div>
+          <div class="info-row"><span class="info-key">ML Lib</span><span class="info-val">Scikit-learn</span></div>
+          <div class="info-row"><span class="info-key">Database</span><span class="info-val">SQLite / PG</span></div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-header">Key Outcomes</div>
+          <div class="info-row"><span class="info-key">Monitoring</span><span class="info-val">Real-time</span></div>
+          <div class="info-row"><span class="info-key">Alert Tiers</span><span class="info-val">3 severity levels</span></div>
+          <div class="info-row"><span class="info-key">AI Insights</span><span class="info-val">Automated</span></div>
+          <div class="info-row"><span class="info-key">Anomaly Det.</span><span class="info-val">ML-powered</span></div>
+          <div class="info-row"><span class="info-key">Cost Reports</span><span class="info-val">Per-instance</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Cloud<span>Ops</span>AI</div>
+      <p>AI-Powered Cloud Infrastructure Management</p>
+    </div>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#demo">Demo</a>
+      <a href="#stack">Stack</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#about">About</a>
+    </div>
+    <div class="footer-copy">Built with Python · Flask · Ollama · Scikit-learn</div>
+  </div>
+</footer>
+
+<script>
+/* ─── CANVAS PARTICLE BACKGROUND ─── */
+(function(){
+  const canvas=document.getElementById('bg-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,particles=[];
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  class Particle{
+    constructor(){this.reset()}
+    reset(){
+      this.x=Math.random()*W;this.y=Math.random()*H;
+      this.vx=(Math.random()-0.5)*0.3;this.vy=(Math.random()-0.5)*0.3;
+      this.r=Math.random()*1.5+0.3;this.a=Math.random()*0.4+0.1;
+      this.c=Math.random()>0.6?'0,212,255':'124,58,237';
+    }
+    update(){
+      this.x+=this.vx;this.y+=this.vy;
+      if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset();
+    }
+    draw(){
+      ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${this.c},${this.a})`;ctx.fill();
+    }
+  }
+  for(let i=0;i<80;i++)particles.push(new Particle());
+  function drawConnections(){
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<120){
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x,particles[i].y);
+          ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.strokeStyle=`rgba(0,212,255,${0.06*(1-dist/120)})`;
+          ctx.lineWidth=0.5;ctx.stroke();
+        }
+      }
+    }
+  }
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{p.update();p.draw()});
+    drawConnections();requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ─── SCROLL PROGRESS ─── */
+const progBar=document.getElementById('progress-bar');
+window.addEventListener('scroll',()=>{
+  const total=document.body.scrollHeight-window.innerHeight;
+  progBar.style.width=(window.scrollY/total*100)+'%';
+});
+
+/* ─── NAVBAR SCROLL EFFECT ─── */
+const navbar=document.getElementById('navbar');
+window.addEventListener('scroll',()=>{
+  navbar.classList.toggle('scrolled',window.scrollY>30);
+});
+
+/* ─── ACTIVE NAV LINK ─── */
+const sections=document.querySelectorAll('section[id]');
+const navLinks=document.querySelectorAll('.nav-link');
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(a=>{
+        a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id);
+      });
+    }
+  });
+},{threshold:0.4});
+sections.forEach(s=>observer.observe(s));
+
+/* ─── HAMBURGER ─── */
+const hamburger=document.getElementById('hamburger');
+const mobileMenu=document.getElementById('mobile-menu');
+hamburger.addEventListener('click',()=>{
+  mobileMenu.classList.toggle('open');
+  const spans=hamburger.querySelectorAll('span');
+  if(mobileMenu.classList.contains('open')){
+    spans[0].style.transform='rotate(45deg) translate(5px,5px)';
+    spans[1].style.opacity='0';
+    spans[2].style.transform='rotate(-45deg) translate(5px,-5px)';
+  } else {
+    spans.forEach(s=>{s.style.transform='';s.style.opacity=''});
+  }
+});
+mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+  mobileMenu.classList.remove('open');
+  hamburger.querySelectorAll('span').forEach(s=>{s.style.transform='';s.style.opacity=''});
+}));
+
+/* ─── BACK TO TOP ─── */
+const backTop=document.getElementById('back-top');
+window.addEventListener('scroll',()=>backTop.classList.toggle('visible',window.scrollY>400));
+backTop.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+/* ─── TOAST ─── */
+function showToast(msg,icon='✓'){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.querySelector('.toast-icon').textContent=icon;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ─── SCROLL REVEAL ─── */
+const revealEls=document.querySelectorAll('.reveal');
+const revObs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');revObs.unobserve(e.target)}});
+},{threshold:0.08});
+revealEls.forEach(el=>revObs.observe(el));
+
+/* ─── HERO STAT COUNTERS ─── */
+function animateCount(el){
+  const target=parseFloat(el.dataset.count);
+  const isDecimal=target%1!==0;
+  const duration=1800,start=performance.now();
+  function tick(now){
+    const t=Math.min((now-start)/duration,1);
+    const ease=1-Math.pow(1-t,3);
+    const val=target*ease;
+    el.textContent=isDecimal?val.toFixed(1):Math.round(val);
+    if(t<1)requestAnimationFrame(tick);
+    else el.textContent=isDecimal?target.toFixed(1):target;
+  }
+  requestAnimationFrame(tick);
+}
+const statsObs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){animateCount(e.target);statsObs.unobserve(e.target)}
+  });
+},{threshold:0.5});
+document.querySelectorAll('[data-count]').forEach(el=>statsObs.observe(el));
+
+/* ─── MOCK SPARKLINE ─── */
+(function(){
+  const el=document.getElementById('mock-sparkline');
+  const data=[38,52,44,78,90,62,55,72,95,67,74,60];
+  data.forEach(v=>{
+    const bar=document.createElement('div');
+    bar.className='bar-s';
+    bar.style.height=(v/100*100)+'%';
+    const color=v>85?'var(--red)':v>70?'var(--amber)':'var(--cyan)';
+    bar.style.background=color;bar.style.opacity='0.75';
+    el.appendChild(bar);
+  });
+})();
+
+/* ─── LIVE CHART ─── */
+(function(){
+  const canvas=document.getElementById('live-canvas');
+  const ctx=canvas.getContext('2d');
+  const labelEl=document.getElementById('live-label');
+  const valEl=document.getElementById('live-current');
+
+  const metrics={
+    cpu:{label:'CPU Usage %',unit:'%',color:'#00d4ff',base:60,variance:25},
+    memory:{label:'Memory Usage %',unit:'%',color:'#a855f7',base:70,variance:15},
+    network:{label:'Network MB/s',unit:' MB/s',color:'#00ff9d',base:45,variance:40},
+    cost:{label:'Cost $/hr',unit:'/hr',color:'#f59e0b',base:1.2,variance:0.8}
+  };
+  let current='cpu';
+  let history=[];
+  const MAX=40;
+
+  function generatePoint(m){
+    const prev=history.length?history[history.length-1]:m.base;
+    const drift=(m.base-prev)*0.1;
+    return Math.max(0,Math.min(m.base*1.5,prev+drift+(Math.random()-0.48)*m.variance*0.3));
+  }
+
+  for(let i=0;i<MAX;i++)history.push(metrics[current].base+(Math.random()-0.5)*20);
+
+  function draw(){
+    const m=metrics[current];
+    const dpr=window.devicePixelRatio||1;
+    const rect=canvas.getBoundingClientRect();
+    canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;
+    ctx.scale(dpr,dpr);
+    const W=rect.width,H=rect.height;
+    const min=0,max=m.base*1.6;
+    function toY(v){return H-((v-min)/(max-min))*H*0.85-H*0.05}
+
+    // Grid lines
+    ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){
+      const y=H*0.05+H*0.85/4*i;
+      ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+    }
+
+    if(history.length<2)return;
+    const step=W/(MAX-1);
+
+    // Fill
+    const grad=ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,m.color+'40');grad.addColorStop(1,m.color+'00');
+    ctx.beginPath();
+    ctx.moveTo(0,H);
+    history.forEach((v,i)=>i===0?ctx.lineTo(0,toY(v)):ctx.lineTo(i*step,toY(v)));
+    ctx.lineTo((MAX-1)*step,H);ctx.closePath();
+    ctx.fillStyle=grad;ctx.fill();
+
+    // Line
+    ctx.beginPath();
+    history.forEach((v,i)=>i===0?ctx.moveTo(0,toY(v)):ctx.lineTo(i*step,toY(v)));
+    ctx.strokeStyle=m.color;ctx.lineWidth=2;
+    ctx.shadowColor=m.color;ctx.shadowBlur=8;
+    ctx.stroke();ctx.shadowBlur=0;
+
+    // Dot
+    const last=history[history.length-1];
+    ctx.beginPath();ctx.arc((MAX-1)*step,toY(last),4,0,Math.PI*2);
+    ctx.fillStyle=m.color;ctx.fill();
+    ctx.beginPath();ctx.arc((MAX-1)*step,toY(last),7,0,Math.PI*2);
+    ctx.strokeStyle=m.color+'80';ctx.lineWidth=2;ctx.stroke();
+
+    valEl.textContent=current==='cost'?last.toFixed(2):Math.round(last);
+    const u=document.querySelector('#live-current + span');
+    if(u)u.textContent=m.unit;
+  }
+
+  function tick(){
+    const m=metrics[current];
+    history.push(generatePoint(m));
+    if(history.length>MAX)history.shift();
+    draw();
+  }
+
+  draw();
+  const interval=setInterval(tick,800);
+
+  document.querySelectorAll('.demo-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.demo-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      current=btn.dataset.metric;
+      history=[];
+      const m=metrics[current];
+      for(let i=0;i<MAX;i++)history.push(m.base+(Math.random()-0.5)*m.variance);
+      labelEl.textContent=m.label;
+      draw();
+    });
+  });
+
+  window.addEventListener('resize',draw);
+})();
+
+/* ─── AI CHAT ─── */
+(function(){
+  const responses={
+    cpu:["The CPU spike in us-east-1 appears to be driven by a scheduled batch job running at 14:00 UTC. I recommend pre-scaling +2 instances at 13:30 to absorb the load before it hits. This pattern has repeated for 7 consecutive days with 94% confidence.","CPU usage crossed the 90% threshold at 14:07 UTC. Auto-scaling has been triggered and 2 new instances are provisioning. ETA: ~3 minutes. I'll notify you when they're healthy."],
+    cost:["I've identified 3 cost optimization opportunities: (1) 2 idle t3.medium instances in ap-south-1 can be terminated — saving $34/day. (2) Switching us-west-2 from On-Demand to Spot instances for non-critical workloads saves ~$120/month. (3) Right-sizing i-0a1b2c3d from m5.xlarge to m5.large saves $58/month.","Your estimated monthly spend is $842. Based on usage patterns, I can reduce this by approximately 18% through right-sizing and scheduling. Would you like me to generate a detailed cost optimization report?"],
+    anomaly:["I've detected 2 anomalies in the last 24 hours: (1) Unusual network egress spike at 02:14 UTC from i-9z8y7x6w — 3.2GB transferred in 8 minutes, deviation: +340%. (2) Memory leak pattern detected on i-4e5f6g7h — gradual increase of ~2% per hour over 12 hours. Both flagged for investigation.","Anomaly detection model (Isolation Forest) flagged a disk I/O pattern on eu-west-2 that's inconsistent with baseline. Confidence: 87%. Recommend running a disk health check — early signs of SSD degradation noted."],
+    optimize:["Infrastructure optimization recommendations: ① Pre-scale us-east-1 before the 14:00 UTC window (+2 nodes). ② Terminate 2 idle ap-south-1 instances ($34/day saving). ③ Enable auto-scaling policies for eu-west-2 (currently manual). ④ Right-size i-0a1b2c3d to m5.large. Total estimated saving: $180/month.","Running optimization analysis… Your infrastructure efficiency score is 71/100. Key improvements: enable spot instances for dev workloads, consolidate ap-south-1 idle nodes, and configure memory-based autoscaling triggers. Implementing all recommendations would raise your score to ~88/100."],
+    default:["I'm analyzing your infrastructure data now. Based on current metrics, all critical systems are operational with one warning-level alert in ap-south-1 for elevated memory usage. CPU across us-east-1 is trending down after the auto-scaling event completed successfully.","That's a great question about your cloud infrastructure. I can see across all 24 monitored instances that performance is generally healthy. The main concern right now is the recurring CPU pattern in us-east-1 — I'd suggest reviewing the batch job schedule to better distribute load.","I've cross-referenced this with the last 30 days of infrastructure telemetry. The pattern you're seeing is consistent with a gradual traffic increase of about 8% week-over-week. At current growth, you'll need to provision additional capacity in approximately 3 weeks."]
+  };
+
+  const suggestions={
+    "What's causing the CPU spike?":{key:'cpu'},
+    "How can I reduce costs?":{key:'cost'},
+    "Show me anomalies":{key:'anomaly'},
+    "Optimize my infrastructure":{key:'optimize'}
+  };
+
+  const messages=document.getElementById('chat-messages');
+  const input=document.getElementById('ai-input');
+  const sendBtn=document.getElementById('ai-send');
+
+  function addMsg(text,role){
+    const div=document.createElement('div');
+    div.className='msg '+role;div.textContent=text;
+    messages.appendChild(div);
+    messages.scrollTop=messages.scrollHeight;
+    return div;
+  }
+
+  function getKey(text){
+    const t=text.toLowerCase();
+    if(t.includes('cpu')||t.includes('spike')||t.includes('processor'))return 'cpu';
+    if(t.includes('cost')||t.includes('money')||t.includes('saving')||t.includes('bill'))return 'cost';
+    if(t.includes('anomal')||t.includes('unusual')||t.includes('detect'))return 'anomaly';
+    if(t.includes('optim')||t.includes('improve')||t.includes('efficien'))return 'optimize';
+    return 'default';
+  }
+
+  function send(text){
+    if(!text.trim())return;
+    addMsg(text,'user');
+    input.value='';
+    const typing=addMsg('Analyzing infrastructure data…','ai typing');
+    setTimeout(()=>{
+      const key=getKey(text);
+      const opts=responses[key];
+      const resp=opts[Math.floor(Math.random()*opts.length)];
+      typing.textContent=resp;typing.classList.remove('typing');
+      messages.scrollTop=messages.scrollHeight;
+    },900+Math.random()*600);
+  }
+
+  sendBtn.addEventListener('click',()=>send(input.value));
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')send(input.value)});
+
+  document.querySelectorAll('.ai-sug').forEach(btn=>{
+    btn.addEventListener('click',()=>send(btn.dataset.q));
+  });
+})();
+
+/* ─── ALERT FILTER ─── */
+(function(){
+  const btns=document.querySelectorAll('.filter-btn');
+  btns.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      btns.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter=btn.dataset.filter;
+      document.querySelectorAll('.alert-card').forEach(card=>{
+        const hide=filter!=='all'&&card.dataset.sev!==filter;
+        card.classList.toggle('hidden',hide);
+        if(!hide){card.style.animation='none';requestAnimationFrame(()=>{card.style.animation=''})}
+      });
+    });
+  });
+})();
+
+/* ─── TAG HOVER COPY ─── */
+document.querySelectorAll('.tag').forEach(tag=>{
+  tag.addEventListener('click',()=>{
+    navigator.clipboard.writeText(tag.textContent).then(()=>showToast('Copied: '+tag.textContent,'📋')).catch(()=>{});
+  });
+  tag.title='Click to copy';tag.style.cursor='pointer';
+});
+
+/* ─── KEYBOARD SHORTCUT ─── */
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){
+    e.preventDefault();
+    document.getElementById('ai-input').focus();
+    showToast('AI Assistant ready','✦');
+  }
+});
+</script>
+</body>
+</html>
